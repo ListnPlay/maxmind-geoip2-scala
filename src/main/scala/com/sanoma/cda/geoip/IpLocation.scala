@@ -46,7 +46,7 @@ object IpLocation {
   /**
    * Function to convert null: java.lang.Double to None: Option[Double]
    */
-  def jDoubleOptionify(jd: java.lang.Double): Option[Double] = Option(jd)
+  def jDoubleOptionify(jd: java.lang.Double): Option[Double] = Option(jd:Any).map(_.asInstanceOf[Double])
 
   /**
    * Constructs an IpLocation from a MaxMind Location
