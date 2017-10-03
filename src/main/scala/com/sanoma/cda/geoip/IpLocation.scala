@@ -27,7 +27,9 @@ case class IpLocation(
                        postalCode: Option[String],
                        continent: Option[String],
                        regionCode: Option[String] = None,
-                       continentCode: Option[String] = None)
+                       continentCode: Option[String] = None,
+                       timezone: Option[String] = None
+                     )
 
 // MaxMind
 import com.maxmind.geoip2.model.CityResponse
@@ -51,17 +53,18 @@ object IpLocation {
   /**
    * Constructs an IpLocation from a MaxMind Location
    */
-  def apply(omni: CityResponse): IpLocation = new IpLocation(
-    Option(omni.getCountry) map (_.getIsoCode),
-    Option(omni.getCountry) map (_.getName),
-    Option(omni.getMostSpecificSubdivision) map (_.getName),
-    Option(omni.getCity) map (_.getName),
-    if (omni.getLocation != null)
+  def apply(omni: CityResponse): IpLocation = IpLocation(
+    countryCode = Option(omni.getCountry) map (_.getIsoCode),
+    countryName = Option(omni.getCountry) map (_.getName),
+    region = Option(omni.getMostSpecificSubdivision) map (_.getName),
+    city = Option(omni.getCity) map (_.getName),
+    geoPoint = if (omni.getLocation != null)
       combineLatLong(jDoubleOptionify(omni.getLocation.getLatitude), jDoubleOptionify(omni.getLocation.getLongitude))
     else None,
-    Option(omni.getPostal) map (_.getCode),
-    Option(omni.getContinent) map (_.getName),
-    Option(omni.getMostSpecificSubdivision) map (_.getIsoCode),
-    Option(omni.getContinent) map (_.getCode)
+    postalCode = Option(omni.getPostal) map (_.getCode),
+    continent = Option(omni.getContinent) map (_.getName),
+    regionCode = Option(omni.getMostSpecificSubdivision) map (_.getIsoCode),
+    continentCode = Option(omni.getContinent) map (_.getCode),
+    timezone = Option(omni.getLocation) flatMap (x => Option(x.getTimeZone))
   )
 }
